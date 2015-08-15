@@ -28,6 +28,7 @@ fn main() {
     for service in services {
         let result = service.get_users();
         println!("{}", result.service_name);
+        println!("{}", "=".chars().cycle().take(result.service_name.len()).collect::<String>());
         println!("");
         for user in result.users {
             println!("{} ({}){}", user.name, user.email, match user.details {
@@ -35,5 +36,7 @@ fn main() {
                 None => "".to_string(),
             });
         }
+        println!("");
+        println!("");
     }
 }
