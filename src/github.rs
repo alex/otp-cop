@@ -1,26 +1,79 @@
+use std::io::{Read};
+
 use getopts;
 
+use hyper::header::{Authorization, Basic, UserAgent};
+use hyper::{Client};
+
+use rustc_serialize::{json};
+
 use super::{CreateServiceResult, Service, ServiceFactory, ServiceResult, User};
+
+
+#[derive(RustcDecodable)]
+struct GithubUser {
+    login: String,
+}
 
 
 pub struct GithubServiceFactory;
 
 impl ServiceFactory for GithubServiceFactory {
     fn add_options(&self, opts: &mut getopts:: Options) {
+        opts.reqopt(
+            "", "github-org", "Gitub organization", "org",
+        );
+        opts.reqopt(
+            "", "github-username", "Gitub username", "username",
+        );
+        opts.reqopt(
+            "", "github-password", "Github password", "password",
+        );
     }
 
     fn create_service(&self, matches: &getopts::Matches) -> CreateServiceResult {
-        return CreateServiceResult::None;
+        return CreateServiceResult::Service(Box::new(GithubService{
+            org: matches.opt_str("github-org").unwrap(),
+            username: matches.opt_str("github-username").unwrap(),
+            password: matches.opt_str("github-password").unwrap(),
+        }));
     }
 }
 
-struct GithubService;
+struct GithubService {
+    org: String,
+    username: String,
+    password: String,
+}
 
 impl Service for GithubService {
     fn get_users(&self) -> ServiceResult {
+        let client = Client::new();
+
+        let mut response = client.get(
+            &format!("https://api.github.com/orgs/{}/members?filter=2fa_disabled", self.org)
+        ).header(
+            Authorization(Basic{
+                username: self.username.to_string(),
+                password: Some(self.password.to_string()),
+            })
+        ).header(
+            UserAgent("otp-cop/0.1.0".to_string())
+        ).send().unwrap();
+        let mut body = String::new();
+        response.read_to_string(&mut body).unwrap();
+
+        let result = json::decode::<Vec<GithubUser>>(&body).unwrap();
+
         return ServiceResult{
             service_name: "Github".to_string(),
-            users: vec![],
+            users: result.iter().map(|user| {
+                User{
+                    name: user.login.to_string(),
+                    email: "".to_string(),
+                    details: None,
+                }
+            }).collect(),
         }
     }
 }
