@@ -90,7 +90,7 @@ fn main() {
             };
             println!("@{}{}{}", user.name, email, details);
         }
-        if i != services.len() {
+        if i + 1!= services.len() {
             println!("");
             println!("");
         }
