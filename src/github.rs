@@ -88,7 +88,7 @@ impl Service for GithubService {
             users: result.iter().map(|user| {
                 User{
                     name: user.login.to_string(),
-                    email: "".to_string(),
+                    email: None,
                     details: None,
                 }
             }).collect(),

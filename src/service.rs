@@ -8,7 +8,7 @@ pub struct ServiceResult {
 
 pub struct User {
     pub name: String,
-    pub email: String,
+    pub email: Option<String>,
     pub details: Option<String>,
 }
 

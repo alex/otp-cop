@@ -44,10 +44,15 @@ fn main() {
         println!("{}", "=".chars().cycle().take(result.service_name.len()).collect::<String>());
         println!("");
         for user in result.users {
-            println!("@{} ({}){}", user.name, user.email, match user.details {
+            let email = match user.email {
+                Some(email) => format!(" ({})", email),
+                None => "".to_string(),
+            };
+            let details = match user.details {
                 Some(details) => format!(" -- {}", details),
                 None => "".to_string(),
-            });
+            };
+            println!("@{}{}{}", user.name, email, details);
         }
         println!("");
         println!("");
