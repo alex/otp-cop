@@ -24,8 +24,20 @@ Services
 Slack
 +++++
 
-.. code-block::
+.. code-block:: console
 
     $ otp-cop --slack-token='<token>'
 
 You can obtain a token online: https://api.slack.com/web#authentication
+
+Github
+++++++
+
+.. code-block:: console
+
+    $ otp-cop --github-org='<org>' --github-username='<username>' --github-password='<password>'
+
+You can generate a Github personal access token online:
+https://help.github.com/articles/creating-an-access-token-for-command-line-use/
+
+``otp-cop`` requires the ``read:org`` scope.
