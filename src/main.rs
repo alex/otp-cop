@@ -38,7 +38,7 @@ fn main() {
         print!("{}", opts.usage("otp-cop: <args>"));
     }
 
-    for service in services {
+    for (i, service) in services.iter().enumerate() {
         let result = service.get_users();
         println!("{}", result.service_name);
         println!("{}", "=".chars().cycle().take(result.service_name.len()).collect::<String>());
@@ -54,7 +54,9 @@ fn main() {
             };
             println!("@{}{}{}", user.name, email, details);
         }
-        println!("");
-        println!("");
+        if i + 1 != services.len() {
+            println!("");
+            println!("");
+        }
     }
 }
