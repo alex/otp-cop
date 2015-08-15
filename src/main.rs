@@ -19,6 +19,7 @@ impl<T> Iterator for ParallelIter<T> {
 
     fn next(&mut self) -> Option<T> {
         if self.pos < self.count {
+            self.count += 1;
             return self.rx.recv().ok();
         } else {
             return None;
