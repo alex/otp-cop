@@ -20,23 +20,41 @@ pub struct GithubServiceFactory;
 
 impl ServiceFactory for GithubServiceFactory {
     fn add_options(&self, opts: &mut getopts:: Options) {
-        opts.reqopt(
+        opts.optopt(
             "", "github-org", "Gitub organization", "org",
         );
-        opts.reqopt(
+        opts.optopt(
             "", "github-username", "Gitub username", "username",
         );
-        opts.reqopt(
+        opts.optopt(
             "", "github-password", "Github password", "password",
         );
     }
 
     fn create_service(&self, matches: &getopts::Matches) -> CreateServiceResult {
-        return CreateServiceResult::Service(Box::new(GithubService{
-            org: matches.opt_str("github-org").unwrap(),
-            username: matches.opt_str("github-username").unwrap(),
-            password: matches.opt_str("github-password").unwrap(),
-        }));
+        match (
+            matches.opt_str("github-org"),
+            matches.opt_str("github-username"),
+            matches.opt_str("github-password"),
+        ) {
+            (Some(org), Some(username), Some(password)) => CreateServiceResult::Service(Box::new(
+                GithubService{org: org, username: username, password: password}
+            )),
+            (None, None, None) => CreateServiceResult::None,
+            (org, username, password) => {
+                let mut missing = vec![];
+                if org.is_none() {
+                    missing.push("github-org".to_string());
+                }
+                if username.is_none() {
+                    missing.push("github-username".to_string());
+                }
+                if password.is_none() {
+                    missing.push("github-password".to_string());
+                }
+                CreateServiceResult::MissingArguments(missing)
+            }
+        }
     }
 }
 

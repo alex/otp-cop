@@ -34,15 +34,18 @@ pub struct SlackServiceFactory;
 
 impl ServiceFactory for SlackServiceFactory {
     fn add_options(&self, opts: &mut getopts::Options) {
-        opts.reqopt(
+        opts.optopt(
             "", "slack-token", "Slack token (https://api.slack.com/web#authentication", "token"
         );
     }
 
     fn create_service(&self, matches: &getopts::Matches) -> CreateServiceResult {
-        return CreateServiceResult::Service(Box::new(SlackService{
-            token: matches.opt_str("slack-token").unwrap(),
-        }));
+        match matches.opt_str("slack-token") {
+            Some(token) => CreateServiceResult::Service(Box::new(SlackService{
+                token: token
+            })),
+            None => CreateServiceResult::None,
+        }
     }
 }
 

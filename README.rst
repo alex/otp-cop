@@ -14,8 +14,18 @@ To use:
     $ git clone https://github.com/alex/otp-cop
     $ cd otp-cop
     $ cargo build
-    $ ./target/debug/otp-cop \
-        --slack-token='<token>' \
-        --github-org='<org>' --github-username='<username>' --github-password='<password>'
+    $ ./target/debug/otp-cop
 
 Now you go and yell at all these people.
+
+Services
+--------
+
+Slack
++++++
+
+.. code-block::
+
+    $ otp-cop --slack-token='<token>'
+
+You can obtain a token online: https://api.slack.com/web#authentication
