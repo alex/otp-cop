@@ -12,9 +12,15 @@ pub struct User {
     pub details: Option<String>,
 }
 
+pub enum CreateServiceResult {
+    None,
+    MissingArguments(Vec<String>),
+    Service(Box<Service>),
+}
+
 pub trait ServiceFactory {
     fn add_options(&self, &mut getopts::Options);
-    fn create_service(&self, &getopts::Matches) -> Box<Service>;
+    fn create_service(&self, &getopts::Matches) -> CreateServiceResult;
 }
 
 pub trait Service {

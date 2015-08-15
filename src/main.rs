@@ -4,7 +4,7 @@ extern crate otp_cop;
 
 use std::{env};
 
-use otp_cop::service::{ServiceFactory};
+use otp_cop::service::{CreateServiceResult, ServiceFactory};
 
 
 fn main() {
@@ -24,7 +24,16 @@ fn main() {
         Err(e) => panic!(e.to_string()),
     };
 
-    let services = service_factories.iter().map(|factory| factory.create_service(&matches));
+    let mut services = vec![];
+
+    for factory in service_factories.iter() {
+        match factory.create_service(&matches) {
+            CreateServiceResult::Service(s) => services.push(s),
+            CreateServiceResult::MissingArguments(arg) => panic!(format!("Missing arguments: {:?}", arg)),
+            CreateServiceResult::None => continue,
+        }
+    }
+
     for service in services {
         let result = service.get_users();
         println!("{}", result.service_name);

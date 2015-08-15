@@ -6,7 +6,7 @@ use hyper::{Client};
 
 use rustc_serialize::{json};
 
-use super::{Service, ServiceFactory, ServiceResult, User};
+use super::{CreateServiceResult, Service, ServiceFactory, ServiceResult, User};
 
 
 #[derive(RustcDecodable)]
@@ -39,10 +39,10 @@ impl ServiceFactory for SlackServiceFactory {
         );
     }
 
-    fn create_service(&self, matches: &getopts::Matches) -> Box<Service> {
-        return Box::new(SlackService{
+    fn create_service(&self, matches: &getopts::Matches) -> CreateServiceResult {
+        return CreateServiceResult::Service(Box::new(SlackService{
             token: matches.opt_str("slack-token").unwrap(),
-        });
+        }));
     }
 }
 
