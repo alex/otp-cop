@@ -75,7 +75,7 @@ fn main() {
         print!("{}", opts.usage("otp-cop: <args>"));
     }
 
-    for result in parallel(services, |service| service.get_users()) {
+    for (i, result) in parallel(services, |service| service.get_users()).enumerate() {
         println!("{}", result.service_name);
         println!("{}", "=".chars().cycle().take(result.service_name.len()).collect::<String>());
         println!("");
@@ -90,7 +90,9 @@ fn main() {
             };
             println!("@{}{}{}", user.name, email, details);
         }
-        println!("");
-        println!("");
+        if i != services.len() {
+            println!("");
+            println!("");
+        }
     }
 }
