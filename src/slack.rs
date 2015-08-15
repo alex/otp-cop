@@ -74,7 +74,7 @@ impl Service for SlackService {
             }
         }).map(|user|
             User{
-                name: format!("@{}", user.name.to_string()),
+                name: user.name.to_string(),
                 email: user.profile.email.to_string(),
                 details: match (user.is_owner.unwrap(), user.is_admin.unwrap()) {
                     (true, true) => Some("Owner/Admin".to_string()),
