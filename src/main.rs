@@ -34,6 +34,10 @@ fn main() {
         }
     }
 
+    if services.is_empty() {
+        print!("{}", opts.usage("otp-cop: <args>"));
+    }
+
     for service in services {
         let result = service.get_users();
         println!("{}", result.service_name);

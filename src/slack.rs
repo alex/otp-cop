@@ -35,7 +35,7 @@ pub struct SlackServiceFactory;
 impl ServiceFactory for SlackServiceFactory {
     fn add_options(&self, opts: &mut getopts::Options) {
         opts.optopt(
-            "", "slack-token", "Slack token (https://api.slack.com/web#authentication", "token"
+            "", "slack-token", "Slack token (https://api.slack.com/web#authentication)", "token"
         );
     }
 
