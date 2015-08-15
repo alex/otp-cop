@@ -2,7 +2,8 @@ extern crate getopts;
 
 extern crate otp_cop;
 
-use std::{env};
+use std::{env, thread};
+use std::sync::{mpsc};
 
 use otp_cop::service::{CreateServiceResult, ServiceFactory};
 
@@ -38,8 +39,17 @@ fn main() {
         print!("{}", opts.usage("otp-cop: <args>"));
     }
 
-    for (i, service) in services.iter().enumerate() {
-        let result = service.get_users();
+    let (tx, rx) = mpsc::channel();
+    let count = services.len();
+    for service in services {
+        let tx = tx.clone();
+        thread::spawn(move || {
+            let result = service.get_users();
+            tx.send(result).unwrap();
+        });
+    }
+
+    for (i, result) in rx.iter().enumerate() {
         println!("{}", result.service_name);
         println!("{}", "=".chars().cycle().take(result.service_name.len()).collect::<String>());
         println!("");
@@ -54,9 +64,11 @@ fn main() {
             };
             println!("@{}{}{}", user.name, email, details);
         }
-        if i + 1 != services.len() {
+        if i + 1 != count {
             println!("");
             println!("");
+        } else {
+            break;
         }
     }
 }
