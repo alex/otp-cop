@@ -1,0 +1,9 @@
+[package]
+name = "otp-cop"
+version = "0.1.0"
+authors = ["Alex Gaynor <alex.gaynor@gmail.com>"]
+
+[dependencies]
+getopts = "*"
+hyper = "*"
+rustc-serialize = "*"
