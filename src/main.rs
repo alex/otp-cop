@@ -3,7 +3,7 @@ extern crate getopts;
 extern crate otp_cop;
 
 use std::{env, thread};
-use std::sync::{mpsc};
+use std::sync::{mpsc, Arc};
 
 use otp_cop::service::{CreateServiceResult, ServiceFactory};
 
@@ -28,13 +28,15 @@ impl<T> Iterator for ParallelIter<T> {
 }
 
 fn parallel<T, U, F1>(objs: Vec<T>, f1: F1) -> ParallelIter<U>
-        where F1: 'static + Fn(T) -> U + Send, T: 'static + Send, U: 'static + Send {
+        where F1: 'static + Fn(T) -> U + Send + Sync, T: 'static + Send, U: 'static + Send {
     let (tx, rx) = mpsc::channel();
     let count = objs.len();
+    let shared_f1 = Arc::new(f1);
     for o in objs {
+        let f1 = shared_f1.clone();
         let tx = tx.clone();
         thread::spawn(move || {
-            tx.send(f1(o));
+            tx.send(f1(o)).unwrap();
         });
     }
 
