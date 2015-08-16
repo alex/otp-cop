@@ -30,18 +30,13 @@ impl<T> Iterator for ParallelIter<T> {
 fn parallel<T, U, F1>(objs: Vec<T>, f1: F1) -> ParallelIter<U>
         where F1: 'static + Fn(T) -> U + Send, T: Send, U: Send {
     let (tx, rx) = mpsc::channel();
-    let mut threads = vec![];
     for o in objs {
-        threads.push(thread::spawn(move || {
+        thread::spawn(move || {
             tx.send(f1(o));
-        }));
+        });
     }
 
-    for t in threads {
-        t.join();
-    }
-
-    return ParallelIter{count: threads.len(), pos: 0, rx: rx};
+    return ParallelIter{count: objs.len(), pos: 0, rx: rx};
 }
 
 fn main() {
