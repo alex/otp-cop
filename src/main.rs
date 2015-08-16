@@ -28,15 +28,17 @@ impl<T> Iterator for ParallelIter<T> {
 }
 
 fn parallel<T, U, F1>(objs: Vec<T>, f1: F1) -> ParallelIter<U>
-        where F1: 'static + Fn(T) -> U + Send, T: Send, U: Send {
+        where F1: 'static + Fn(T) -> U + Send, T: 'static + Send, U: 'static + Send {
     let (tx, rx) = mpsc::channel();
+    let count = objs.len();
     for o in objs {
+        let tx = tx.clone();
         thread::spawn(move || {
             tx.send(f1(o));
         });
     }
 
-    return ParallelIter{count: objs.len(), pos: 0, rx: rx};
+    return ParallelIter{count: count, pos: 0, rx: rx};
 }
 
 fn main() {
@@ -70,6 +72,7 @@ fn main() {
         print!("{}", opts.usage("otp-cop: <args>"));
     }
 
+    let count = services.len();
     for (i, result) in parallel(services, |service| service.get_users()).enumerate() {
         println!("{}", result.service_name);
         println!("{}", "=".chars().cycle().take(result.service_name.len()).collect::<String>());
@@ -85,7 +88,7 @@ fn main() {
             };
             println!("@{}{}{}", user.name, email, details);
         }
-        if i + 1 != services.len() {
+        if i + 1 != count {
             println!("");
             println!("");
         }
