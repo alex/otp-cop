@@ -76,8 +76,9 @@ fn main() {
 
     let count = services.len();
     for (i, result) in parallel(services, |service| service.get_users()).enumerate() {
-        println!("{}", result.service_name);
-        println!("{}", "=".chars().cycle().take(result.service_name.len()).collect::<String>());
+        let header = format!("{} ({})", result.service_name, result.users.len());
+        println!("{}", header);
+        println!("{}", "=".chars().cycle().take(header.len()).collect::<String>());
         println!("");
         for user in result.users {
             let email = match user.email {
