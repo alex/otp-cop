@@ -2,10 +2,46 @@ extern crate getopts;
 
 extern crate otp_cop;
 
-use std::{env};
+use std::{env, thread};
+use std::sync::{mpsc, Arc};
 
 use otp_cop::service::{CreateServiceResult, ServiceFactory};
 
+
+struct ParallelIter<T> {
+    count: usize,
+    pos: usize,
+    rx: mpsc::Receiver<T>
+}
+
+impl<T> Iterator for ParallelIter<T> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<T> {
+        if self.pos < self.count {
+            self.count += 1;
+            return self.rx.recv().ok();
+        } else {
+            return None;
+        }
+    }
+}
+
+fn parallel<T, U, F1>(objs: Vec<T>, f1: F1) -> ParallelIter<U>
+        where F1: 'static + Fn(T) -> U + Send + Sync, T: 'static + Send, U: 'static + Send {
+    let (tx, rx) = mpsc::channel();
+    let count = objs.len();
+    let shared_f1 = Arc::new(f1);
+    for o in objs {
+        let f1 = shared_f1.clone();
+        let tx = tx.clone();
+        thread::spawn(move || {
+            tx.send(f1(o)).unwrap();
+        });
+    }
+
+    return ParallelIter{count: count, pos: 0, rx: rx};
+}
 
 fn main() {
     let service_factories = vec![
@@ -38,8 +74,8 @@ fn main() {
         print!("{}", opts.usage("otp-cop: <args>"));
     }
 
-    for (i, service) in services.iter().enumerate() {
-        let result = service.get_users();
+    let count = services.len();
+    for (i, result) in parallel(services, |service| service.get_users()).enumerate() {
         println!("{}", result.service_name);
         println!("{}", "=".chars().cycle().take(result.service_name.len()).collect::<String>());
         println!("");
@@ -54,7 +90,7 @@ fn main() {
             };
             println!("@{}{}{}", user.name, email, details);
         }
-        if i + 1 != services.len() {
+        if i + 1 != count {
             println!("");
             println!("");
         }

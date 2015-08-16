@@ -23,6 +23,6 @@ pub trait ServiceFactory {
     fn create_service(&self, &getopts::Matches) -> CreateServiceResult;
 }
 
-pub trait Service {
+pub trait Service : Send + Sync {
     fn get_users(&self) -> ServiceResult;
 }
