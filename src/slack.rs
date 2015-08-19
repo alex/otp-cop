@@ -3,6 +3,7 @@ use std::io::{Read};
 use getopts;
 
 use hyper::{Client};
+use hyper::status::{StatusCode};
 
 use rustc_serialize::{json};
 
@@ -60,6 +61,7 @@ impl Service for SlackService {
         let mut response = client.get(
             &format!("https://slack.com/api/users.list?token={}", self.token)
         ).send().unwrap();
+        assert_eq!(response.status, StatusCode::Ok);
         let mut body = String::new();
         response.read_to_string(&mut body).unwrap();
 

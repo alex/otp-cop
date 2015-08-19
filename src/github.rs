@@ -2,8 +2,9 @@ use std::io::{Read};
 
 use getopts;
 
-use hyper::header::{Authorization, Basic, UserAgent};
 use hyper::{Client};
+use hyper::header::{Authorization, Basic, UserAgent};
+use hyper::status::{StatusCode};
 
 use rustc_serialize::{json};
 
@@ -78,6 +79,7 @@ impl Service for GithubService {
         ).header(
             UserAgent("otp-cop/0.1.0".to_string())
         ).send().unwrap();
+        assert_eq!(response.status, StatusCode::Ok);
         let mut body = String::new();
         response.read_to_string(&mut body).unwrap();
 
