@@ -40,6 +40,6 @@ Github
 You can generate a Github personal access token online:
 https://help.github.com/articles/creating-an-access-token-for-command-line-use/.
 
-The user need to be an admin of the organization.
+The user need to be an owner of the organization.
 
 ``otp-cop`` requires the ``read:org`` scope.
