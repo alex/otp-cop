@@ -69,13 +69,7 @@ impl Service for SlackService {
         let result = json::decode::<SlackUserListResponse>(&body).unwrap();
         assert!(result.ok);
         let users = result.members.iter().filter(|user| {
-            match user.deleted {
-                true => false,
-                false => match user.is_bot.unwrap() {
-                    true => false,
-                    false => !user.has_2fa.unwrap(),
-                }
-            }
+            !user.deleted && !user.is_bot.unwrap() && !user.has_2fa.unwrap()
         }).map(|user|
             User{
                 name: user.name.to_string(),
