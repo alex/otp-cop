@@ -20,7 +20,7 @@ struct SlackUserListResponse {
 struct SlackUser {
     name: String,
     deleted: bool,
-    is_bot: bool,
+    is_bot: Option<bool>,
     has_2fa: Option<bool>,
     profile: SlackProfile,
     is_owner: Option<bool>,
@@ -71,10 +71,10 @@ impl Service for SlackService {
         let users = result.members.iter().filter(|user| {
             match (user.deleted, user.is_bot, user.has_2fa) {
                 (true, _, _) => false,
-                (false, true, _) => false,
-                (false, false, None) => true,
-                (false, false, Some(true)) => false,
-                (false, false, Some(false)) => true,
+                (false, Some(true), _) => false,
+                (false, _, None) => true,
+                (false, _, Some(true)) => false,
+                (false, _, Some(false)) => true,
             }
         }).map(|user|
             User{
