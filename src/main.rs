@@ -76,6 +76,7 @@ fn main() {
 
     let count = services.len();
     for (i, result) in parallel(services, |service| service.get_users()).enumerate() {
+        let result = result.ok().unwrap();
         let header = format!("{} ({})", result.service_name, result.users.len());
         println!("{}", header);
         println!("{}", "=".chars().cycle().take(header.len()).collect::<String>());

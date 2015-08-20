@@ -7,7 +7,7 @@ use hyper::status::{StatusCode};
 
 use rustc_serialize::{json};
 
-use super::{CreateServiceResult, Service, ServiceFactory, ServiceResult, User};
+use super::{CreateServiceResult, Service, ServiceFactory, GetUsersResult, GetUsersError, User};
 
 
 #[derive(RustcDecodable)]
@@ -56,7 +56,7 @@ struct SlackService {
 }
 
 impl Service for SlackService {
-    fn get_users(&self) -> ServiceResult {
+    fn get_users(&self) -> Result<GetUsersResult, GetUsersError> {
         let client = Client::new();
 
         let mut response = client.get(
@@ -83,9 +83,9 @@ impl Service for SlackService {
             }
         ).collect();
 
-        return ServiceResult{
+        return Ok(GetUsersResult{
             service_name: "Slack".to_string(),
             users: users,
-        }
+        });
     }
 }

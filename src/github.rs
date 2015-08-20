@@ -8,7 +8,7 @@ use hyper::status::{StatusCode};
 
 use rustc_serialize::{json};
 
-use super::{CreateServiceResult, Service, ServiceFactory, ServiceResult, User};
+use super::{CreateServiceResult, Service, ServiceFactory, GetUsersResult, GetUsersError, User};
 
 
 #[derive(RustcDecodable)]
@@ -66,7 +66,7 @@ struct GithubService {
 }
 
 impl Service for GithubService {
-    fn get_users(&self) -> ServiceResult {
+    fn get_users(&self) -> Result<GetUsersResult, GetUsersError> {
         let client = Client::new();
 
         let mut response = client.get(
@@ -85,7 +85,7 @@ impl Service for GithubService {
 
         let result = json::decode::<Vec<GithubUser>>(&body).unwrap();
 
-        return ServiceResult{
+        return Ok(GetUsersResult{
             service_name: "Github".to_string(),
             users: result.iter().map(|user| {
                 User{
@@ -94,6 +94,6 @@ impl Service for GithubService {
                     details: None,
                 }
             }).collect(),
-        }
+        });
     }
 }
