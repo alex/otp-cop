@@ -20,6 +20,7 @@ struct SlackUserListResponse {
 struct SlackUser {
     name: String,
     deleted: bool,
+    is_bot: bool,
     has_2fa: Option<bool>,
     profile: SlackProfile,
     is_owner: Option<bool>,
@@ -28,7 +29,7 @@ struct SlackUser {
 
 #[derive(RustcDecodable)]
 struct SlackProfile {
-    email: String,
+    email: Option<String>,
 }
 
 pub struct SlackServiceFactory;
@@ -68,16 +69,17 @@ impl Service for SlackService {
         let result = json::decode::<SlackUserListResponse>(&body).unwrap();
         assert!(result.ok);
         let users = result.members.iter().filter(|user| {
-            match (user.deleted, user.has_2fa) {
-                (true, _) => false,
-                (false, None) => true,
-                (false, Some(true)) => false,
-                (false, Some(false)) => true,
+            match (user.deleted, user.is_bot, user.has_2fa) {
+                (true, _, _) => false,
+                (false, true, _) => false,
+                (false, false, None) => true,
+                (false, false, Some(true)) => false,
+                (false, false, Some(false)) => true,
             }
         }).map(|user|
             User{
                 name: user.name.to_string(),
-                email: Some(user.profile.email.to_string()),
+                email: Some(user.profile.email.clone().unwrap()),
                 details: match (user.is_owner.unwrap(), user.is_admin.unwrap()) {
                     (true, true) => Some("Owner/Admin".to_string()),
                     (true, false) => Some("Owner".to_string()),
