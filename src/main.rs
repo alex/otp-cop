@@ -76,25 +76,34 @@ fn main() {
 
     let count = services.len();
     for (i, result) in parallel(services, |service| service.get_users()).enumerate() {
-        let result = result.ok().unwrap();
-        let header = format!("{} ({})", result.service_name, result.users.len());
-        println!("{}", header);
-        println!("{}", "=".chars().cycle().take(header.len()).collect::<String>());
-        println!("");
-        for user in result.users {
-            let email = match user.email {
-                Some(email) => format!(" ({})", email),
-                None => "".to_string(),
-            };
-            let details = match user.details {
-                Some(details) => format!(" -- {}", details),
-                None => "".to_string(),
-            };
-            println!("@{}{}{}", user.name, email, details);
-        }
-        if i + 1 != count {
-            println!("");
-            println!("");
+        match result {
+            Ok(result) => {
+                let header = format!("{} ({})", result.service_name, result.users.len());
+                println!("{}", header);
+                println!("{}", "=".chars().cycle().take(header.len()).collect::<String>());
+                println!("");
+                for user in result.users {
+                    let email = match user.email {
+                        Some(email) => format!(" ({})", email),
+                        None => "".to_string(),
+                    };
+                    let details = match user.details {
+                        Some(details) => format!(" -- {}", details),
+                        None => "".to_string(),
+                    };
+                    println!("@{}{}{}", user.name, email, details);
+                }
+                if i + 1 != count {
+                    println!("");
+                    println!("");
+                }
+            },
+            Err(e) => {
+                println!("{}", e.service_name);
+                println!("{}", "=".chars().cycle().take(e.service_name.len()).collect::<String>());
+                println!("");
+                println!("{}", e.error_message);
+            }
         }
     }
 }

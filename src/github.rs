@@ -12,6 +12,12 @@ use super::{CreateServiceResult, Service, ServiceFactory, GetUsersResult, GetUse
 
 
 #[derive(RustcDecodable)]
+struct GithubError {
+    documentation_url: String,
+    message: String,
+}
+
+#[derive(RustcDecodable)]
 struct GithubUser {
     login: String,
 }
@@ -79,21 +85,33 @@ impl Service for GithubService {
         ).header(
             UserAgent("otp-cop/0.1.0".to_string())
         ).send().unwrap();
-        assert_eq!(response.status, StatusCode::Ok);
         let mut body = String::new();
         response.read_to_string(&mut body).unwrap();
 
-        let result = json::decode::<Vec<GithubUser>>(&body).unwrap();
+        match response.status {
+            StatusCode::Ok => {
+                let result = json::decode::<Vec<GithubUser>>(&body).unwrap();
 
-        return Ok(GetUsersResult{
-            service_name: "Github".to_string(),
-            users: result.iter().map(|user| {
-                User{
-                    name: user.login.to_string(),
-                    email: None,
-                    details: None,
-                }
-            }).collect(),
-        });
+                return Ok(GetUsersResult{
+                    service_name: "Github".to_string(),
+                    users: result.iter().map(|user| {
+                        User{
+                            name: user.login.to_string(),
+                            email: None,
+                            details: None,
+                        }
+                    }).collect(),
+                });
+            },
+            StatusCode::UnprocessableEntity => {
+                let result = json::decode::<GithubError>(&body).unwrap();
+
+                return Err(GetUsersError{
+                    service_name: "Github".to_string(),
+                    error_message: format!("{}\n See {}", result.message, result.documentation_url),
+                });
+            },
+            _ => panic!("Github: unexpected status code"),
+        }
     }
 }
