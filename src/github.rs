@@ -108,7 +108,7 @@ impl Service for GithubService {
 
                 return Err(GetUsersError{
                     service_name: "Github".to_string(),
-                    error_message: format!("{}\n See {}", result.message, result.documentation_url),
+                    error_message: format!("{}\n  See {}", result.message, result.documentation_url),
                 });
             },
             _ => panic!("Github: unexpected status code"),

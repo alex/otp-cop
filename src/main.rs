@@ -1,4 +1,5 @@
 extern crate getopts;
+extern crate term;
 
 extern crate otp_cop;
 
@@ -80,7 +81,7 @@ fn main() {
             Ok(result) => {
                 let header = format!("{} ({})", result.service_name, result.users.len());
                 println!("{}", header);
-                println!("{}", "=".chars().cycle().take(header.len()).collect::<String>());
+                println!("{}", repeat_char("=", header.len()));
                 println!("");
                 for user in result.users {
                     let email = match user.email {
@@ -99,11 +100,18 @@ fn main() {
                 }
             },
             Err(e) => {
-                println!("{}", e.service_name);
-                println!("{}", "=".chars().cycle().take(e.service_name.len()).collect::<String>());
-                println!("");
-                println!("{}", e.error_message);
+                let mut t = term::stderr().unwrap();
+                t.fg(term::color::RED).unwrap();
+                writeln!(t, "{}", e.service_name).unwrap();
+                writeln!(t, "{}", repeat_char("=", e.service_name.len())).unwrap();
+                writeln!(t, "").unwrap();
+                writeln!(t, "{}", e.error_message).unwrap();
+                t.reset().unwrap();
             }
         }
     }
+}
+
+fn repeat_char(c: &'static str, length: usize) -> String {
+    return c.chars().cycle().take(length).collect::<String>();
 }
