@@ -53,10 +53,15 @@ impl ServiceFactory for GithubServiceFactory {
             matches.opt_str("github-password"),
         ) {
             (endpoint, Some(org), Some(username), Some(password)) => CreateServiceResult::Service(Box::new(
-                GithubService{endpoint: endpoint.unwrap_or(DEFAULT_ENDPOINT.to_string()), org: org, username: username, password: password}
+                GithubService{
+                    endpoint: endpoint.unwrap_or(DEFAULT_ENDPOINT.to_string()),
+                    org: org,
+                    username: username,
+                    password: password,
+                }
             )),
             (None, None, None, None) => CreateServiceResult::None,
-            (_endpoint, org, username, password) => {
+            (_, org, username, password) => {
                 let mut missing = vec![];
                 if org.is_none() {
                     missing.push("github-org".to_string());
