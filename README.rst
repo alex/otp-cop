@@ -40,6 +40,12 @@ Github
 You can generate a Github personal access token online:
 https://help.github.com/articles/creating-an-access-token-for-command-line-use/.
 
-The user need to be an owner of the organization.
+The user needs to be an owner of the organization.
 
 ``otp-cop`` requires the ``read:org`` scope.
+
+Github Enterprise users must specify the API endpoint URL.
+
+.. code-block:: console
+
+    $ otp-cop --github-endpoint='<endpoint>' --github-org='<org>' --github-username='<username>' --github-password='<password>'
