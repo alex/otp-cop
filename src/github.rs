@@ -10,6 +10,7 @@ use rustc_serialize::{json};
 
 use super::{CreateServiceResult, Service, ServiceFactory, GetUsersResult, GetUsersError, User};
 
+const DEFAULT_ENDPOINT: &'static str = "https://api.github.com";
 
 #[derive(RustcDecodable)]
 struct GithubError {
@@ -28,6 +29,12 @@ pub struct GithubServiceFactory;
 impl ServiceFactory for GithubServiceFactory {
     fn add_options(&self, opts: &mut getopts:: Options) {
         opts.optopt(
+            "",
+            "github-endpoint",
+            &format!("Github API endpoint URL (default: {})", DEFAULT_ENDPOINT),
+            "endpoint"
+        );
+        opts.optopt(
             "", "github-org", "Gitub organization", "org",
         );
         opts.optopt(
@@ -40,15 +47,16 @@ impl ServiceFactory for GithubServiceFactory {
 
     fn create_service(&self, matches: &getopts::Matches) -> CreateServiceResult {
         match (
+            matches.opt_str("github-endpoint"),
             matches.opt_str("github-org"),
             matches.opt_str("github-username"),
             matches.opt_str("github-password"),
         ) {
-            (Some(org), Some(username), Some(password)) => CreateServiceResult::Service(Box::new(
-                GithubService{org: org, username: username, password: password}
+            (endpoint, Some(org), Some(username), Some(password)) => CreateServiceResult::Service(Box::new(
+                GithubService{endpoint: endpoint.unwrap_or(DEFAULT_ENDPOINT.to_string()), org: org, username: username, password: password}
             )),
-            (None, None, None) => CreateServiceResult::None,
-            (org, username, password) => {
+            (None, None, None, None) => CreateServiceResult::None,
+            (_endpoint, org, username, password) => {
                 let mut missing = vec![];
                 if org.is_none() {
                     missing.push("github-org".to_string());
@@ -66,6 +74,7 @@ impl ServiceFactory for GithubServiceFactory {
 }
 
 struct GithubService {
+    endpoint: String,
     org: String,
     username: String,
     password: String,
@@ -76,7 +85,7 @@ impl Service for GithubService {
         let client = Client::new();
 
         let mut response = client.get(
-            &format!("https://api.github.com/orgs/{}/members?filter=2fa_disabled", self.org)
+            &format!("{}/orgs/{}/members?filter=2fa_disabled", self.endpoint, self.org)
         ).header(
             Authorization(Basic{
                 username: self.username.to_string(),
