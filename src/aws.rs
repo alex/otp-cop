@@ -86,11 +86,14 @@ impl Service for AWSService {
 
         return Ok(GetUsersResult{
                     service_name: "aws".to_string(),
-                    users: aws_users.iter().map(|user|
-                        User{
-                            name: user.user.to_string(),
-                            email: None,
-                            details: Some(user.arn.to_string())
+                    users: aws_users.iter().filter_map(|user|
+                        match user.mfa_active {
+                            false => Some(User{
+                                            name: user.user.to_string(),
+                                            email: None,
+                                            details: Some(user.arn.to_string())
+                                          }),
+                            _ => None
                         }).collect()
                     });
     }
