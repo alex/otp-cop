@@ -6,6 +6,7 @@ use hyper::client::response::{Response};
 
 use rusoto::credentials::{AWSCredentials};
 use rusoto::signature::{SignedRequest};
+use rusoto::regions::{Region};
 
 use xmltree::{Element};
 
@@ -139,10 +140,11 @@ struct AWSUser {
 
 impl AWSService {
     fn request(&self, action: Action) -> Response {
+        let region = Region::UsEast1;
         let mut request = SignedRequest::new(
             "GET",
             "iam",
-            "us-east-1",
+            &region,
             "/",
         );
 
@@ -150,9 +152,9 @@ impl AWSService {
         request.add_param("Action", &action.as_str());
 
         let credentials = AWSCredentials::new(
-            &self.access_key_id,
-            &self.secret_key,
-            "",
+            self.access_key_id.as_ref(),
+            self.secret_key.as_ref(),
+            None,
             UTC::now() + Duration::seconds(600));
 
         return request.sign_and_execute(&credentials)

@@ -48,6 +48,7 @@ fn main() {
     let service_factories = vec![
         Box::new(otp_cop::SlackServiceFactory) as Box<ServiceFactory>,
         Box::new(otp_cop::GithubServiceFactory) as Box<ServiceFactory>,
+        Box::new(otp_cop::AWSServiceFactory) as Box<ServiceFactory>,
     ];
 
     let mut opts = getopts::Options::new();
