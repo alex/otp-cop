@@ -27,7 +27,7 @@ struct GithubUser {
 pub struct GithubServiceFactory;
 
 impl ServiceFactory for GithubServiceFactory {
-    fn add_options(&self, opts: &mut getopts:: Options) {
+    fn add_options(&self, opts: &mut getopts::Options) {
         opts.optopt(
             "",
             "github-endpoint",
