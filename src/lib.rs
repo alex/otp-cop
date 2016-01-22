@@ -1,4 +1,5 @@
 extern crate getopts;
+extern crate regex;
 extern crate hyper;
 extern crate rustc_serialize;
 
