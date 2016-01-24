@@ -11,6 +11,7 @@ pub struct GetUsersError {
     pub error_message: String,
 }
 
+#[derive(Clone)]
 pub struct User {
     pub name: String,
     pub email: Option<String>,
