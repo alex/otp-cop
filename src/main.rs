@@ -84,6 +84,7 @@ fn main() {
     }
 
     let count = services.len();
+    let mut people_found = false;
     for (i, result) in parallel(services, |service| service.get_users()).enumerate() {
         match result {
             Ok(result) => {
@@ -91,6 +92,9 @@ fn main() {
                 println!("{}", header);
                 println!("{}", repeat_char("=", header.len()));
                 println!("");
+                if !result.users.is_empty() {
+                    people_found = true;
+                }
                 for user in result.users {
                     let email = match user.email {
                         Some(email) => format!(" ({})", email),
@@ -117,6 +121,10 @@ fn main() {
                 t.reset().unwrap();
             }
         }
+    }
+
+    if people_found {
+        process::exit(2);
     }
 }
 
