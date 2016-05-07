@@ -3,7 +3,8 @@ extern crate term;
 
 extern crate otp_cop;
 
-use std::{env, thread};
+use std::{env, io, process, thread};
+use std::io::Write;
 use std::sync::{mpsc, Arc};
 
 use otp_cop::service::{CreateServiceResult, ServiceFactory};
@@ -58,7 +59,10 @@ fn main() {
 
     let matches = match opts.parse(env::args().skip(1)) {
         Ok(matches) => matches,
-        Err(e) => panic!(e.to_string()),
+        Err(e) => {
+            writeln!(io::stderr(), "{}", e.to_string()).unwrap();
+            process::exit(1);
+        }
     };
 
     let mut services = vec![];
@@ -66,13 +70,17 @@ fn main() {
     for factory in service_factories.iter() {
         match factory.create_service(&matches) {
             CreateServiceResult::Service(s) => services.push(s),
-            CreateServiceResult::MissingArguments(arg) => panic!(format!("Missing arguments: {:?}", arg)),
+            CreateServiceResult::MissingArguments(args) => {
+                writeln!(io::stderr(), "Missing arguments: {:?}", args).unwrap();
+                process::exit(1);
+            }
             CreateServiceResult::None => continue,
         }
     }
 
     if services.is_empty() {
-        print!("{}", opts.usage("otp-cop: <args>"));
+        writeln!(io::stderr(), "{}", opts.usage("otp-cop: <args>")).unwrap();
+        process::exit(1);
     }
 
     let count = services.len();
