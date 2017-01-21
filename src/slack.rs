@@ -3,7 +3,10 @@ use std::io::{Read};
 use getopts;
 
 use hyper::{Client};
+use hyper::net::HttpsConnector;
 use hyper::status::{StatusCode};
+
+use hyper_native_tls::NativeTlsClient;
 
 use rustc_serialize::{json};
 
@@ -57,7 +60,7 @@ struct SlackService {
 
 impl Service for SlackService {
     fn get_users(&self) -> Result<GetUsersResult, GetUsersError> {
-        let client = Client::new();
+        let client = Client::with_connector(HttpsConnector::new(NativeTlsClient::new().unwrap()));
 
         let mut response = client.get(
             &format!("https://slack.com/api/users.list?token={}", self.token)

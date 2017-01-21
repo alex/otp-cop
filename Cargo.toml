@@ -8,5 +8,6 @@ license = "BSD-3-Clause"
 [dependencies]
 getopts = "*"
 hyper = "*"
+hyper-native-tls = "*"
 rustc-serialize = "*"
 term = "*"

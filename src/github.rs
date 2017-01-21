@@ -4,7 +4,10 @@ use getopts;
 
 use hyper::{Client};
 use hyper::header::{Authorization, Basic, UserAgent};
+use hyper::net::HttpsConnector;
 use hyper::status::{StatusCode};
+
+use hyper_native_tls::NativeTlsClient;
 
 use rustc_serialize::{json};
 
@@ -87,7 +90,7 @@ struct GithubService {
 
 impl Service for GithubService {
     fn get_users(&self) -> Result<GetUsersResult, GetUsersError> {
-        let client = Client::new();
+        let client = Client::with_connector(HttpsConnector::new(NativeTlsClient::new().unwrap()));
 
         let mut response = client.get(
             &format!("{}/orgs/{}/members?filter=2fa_disabled", self.endpoint, self.org)
