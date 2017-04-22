@@ -1,6 +1,7 @@
 use std::io::{Read};
 
 use getopts;
+use serde_json;
 
 use hyper::{Client};
 use hyper::header::{Authorization, Basic, UserAgent};
@@ -9,19 +10,17 @@ use hyper::status::{StatusCode};
 
 use hyper_native_tls::NativeTlsClient;
 
-use rustc_serialize::{json};
-
 use super::{CreateServiceResult, Service, ServiceFactory, GetUsersResult, GetUsersError, User};
 
 const DEFAULT_ENDPOINT: &'static str = "https://api.github.com";
 
-#[derive(RustcDecodable)]
+#[derive(Deserialize)]
 struct GithubError {
     documentation_url: String,
     message: String,
 }
 
-#[derive(RustcDecodable)]
+#[derive(Deserialize)]
 struct GithubUser {
     login: String,
 }
@@ -107,7 +106,7 @@ impl Service for GithubService {
 
         match response.status {
             StatusCode::Ok => {
-                let result = json::decode::<Vec<GithubUser>>(&body).unwrap();
+                let result = serde_json::from_str::<Vec<GithubUser>>(&body).unwrap();
 
                 return Ok(GetUsersResult{
                     service_name: "Github".to_string(),
@@ -121,7 +120,7 @@ impl Service for GithubService {
                 });
             },
             StatusCode::UnprocessableEntity => {
-                let result = json::decode::<GithubError>(&body).unwrap();
+                let result = serde_json::from_str::<GithubError>(&body).unwrap();
 
                 return Err(GetUsersError{
                     service_name: "Github".to_string(),

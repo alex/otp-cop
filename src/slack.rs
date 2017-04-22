@@ -1,6 +1,7 @@
 use std::io::{Read};
 
 use getopts;
+use serde_json;
 
 use hyper::{Client};
 use hyper::net::HttpsConnector;
@@ -8,18 +9,16 @@ use hyper::status::{StatusCode};
 
 use hyper_native_tls::NativeTlsClient;
 
-use rustc_serialize::{json};
-
 use super::{CreateServiceResult, Service, ServiceFactory, GetUsersResult, GetUsersError, User};
 
 
-#[derive(RustcDecodable)]
+#[derive(Deserialize)]
 struct SlackUserListResponse {
     ok: bool,
     members: Vec<SlackUser>,
 }
 
-#[derive(RustcDecodable)]
+#[derive(Deserialize)]
 struct SlackUser {
     name: String,
     deleted: bool,
@@ -30,7 +29,7 @@ struct SlackUser {
     is_admin: Option<bool>,
 }
 
-#[derive(RustcDecodable)]
+#[derive(Deserialize)]
 struct SlackProfile {
     email: Option<String>,
 }
@@ -69,7 +68,7 @@ impl Service for SlackService {
         let mut body = String::new();
         response.read_to_string(&mut body).unwrap();
 
-        let result = json::decode::<SlackUserListResponse>(&body).unwrap();
+        let result = serde_json::from_str::<SlackUserListResponse>(&body).unwrap();
         assert!(result.ok);
         let users = result.members.iter().filter(|user| {
             !user.deleted && !user.is_bot.unwrap() && !user.has_2fa.unwrap()
