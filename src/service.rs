@@ -1,6 +1,5 @@
 extern crate getopts;
 
-
 pub struct GetUsersResult {
     pub service_name: String,
     pub users: Vec<User>,
@@ -28,6 +27,6 @@ pub trait ServiceFactory {
     fn create_service(&self, &getopts::Matches) -> CreateServiceResult;
 }
 
-pub trait Service : Send + Sync {
+pub trait Service: Send + Sync {
     fn get_users(&self) -> Result<GetUsersResult, GetUsersError>;
 }

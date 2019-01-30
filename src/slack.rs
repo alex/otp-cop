@@ -1,16 +1,11 @@
-use std::io::{Read};
+use std::io::Read;
 
 use getopts;
 use serde_json;
 
-use hyper::{Client};
-use hyper::net::HttpsConnector;
-use hyper::status::{StatusCode};
+use reqwest::StatusCode;
 
-use hyper_native_tls::NativeTlsClient;
-
-use super::{CreateServiceResult, Service, ServiceFactory, GetUsersResult, GetUsersError, User};
-
+use super::{CreateServiceResult, GetUsersError, GetUsersResult, Service, ServiceFactory, User};
 
 #[derive(Deserialize)]
 struct SlackUserListResponse {
@@ -39,15 +34,16 @@ pub struct SlackServiceFactory;
 impl ServiceFactory for SlackServiceFactory {
     fn add_options(&self, opts: &mut getopts::Options) {
         opts.optopt(
-            "", "slack-token", "Slack token (https://api.slack.com/web#authentication)", "token"
+            "",
+            "slack-token",
+            "Slack token (https://api.slack.com/web#authentication)",
+            "token",
         );
     }
 
     fn create_service(&self, matches: &getopts::Matches) -> CreateServiceResult {
         match matches.opt_str("slack-token") {
-            Some(token) => CreateServiceResult::Service(Box::new(SlackService{
-                token: token
-            })),
+            Some(token) => CreateServiceResult::Service(Box::new(SlackService { token: token })),
             None => CreateServiceResult::None,
         }
     }
@@ -59,33 +55,38 @@ struct SlackService {
 
 impl Service for SlackService {
     fn get_users(&self) -> Result<GetUsersResult, GetUsersError> {
-        let client = Client::with_connector(HttpsConnector::new(NativeTlsClient::new().unwrap()));
+        let client = reqwest::Client::new();
 
-        let mut response = client.get(
-            &format!("https://slack.com/api/users.list?token={}", self.token)
-        ).send().unwrap();
-        assert_eq!(response.status, StatusCode::Ok);
+        let mut response = client
+            .get(&format!(
+                "https://slack.com/api/users.list?token={}",
+                self.token
+            ))
+            .send()
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
         let mut body = String::new();
         response.read_to_string(&mut body).unwrap();
 
         let result = serde_json::from_str::<SlackUserListResponse>(&body).unwrap();
         assert!(result.ok);
-        let users = result.members.iter().filter(|user| {
-            !user.deleted && !user.is_bot.unwrap() && !user.has_2fa.unwrap()
-        }).map(|user|
-            User{
+        let users = result
+            .members
+            .iter()
+            .filter(|user| !user.deleted && !user.is_bot.unwrap() && !user.has_2fa.unwrap())
+            .map(|user| User {
                 name: user.name.to_string(),
                 email: Some(user.profile.email.clone().unwrap()),
                 details: match (user.is_owner.unwrap(), user.is_admin.unwrap()) {
                     (true, true) => Some("Owner/Admin".to_string()),
                     (true, false) => Some("Owner".to_string()),
                     (false, true) => Some("Admin".to_string()),
-                    (false, false) => None
-                }
-            }
-        ).collect();
+                    (false, false) => None,
+                },
+            })
+            .collect();
 
-        return Ok(GetUsersResult{
+        return Ok(GetUsersResult {
             service_name: "Slack".to_string(),
             users: users,
         });

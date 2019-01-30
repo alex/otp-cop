@@ -3,17 +3,16 @@ extern crate term;
 
 extern crate otp_cop;
 
-use std::{env, io, process, thread};
 use std::io::Write;
 use std::sync::{mpsc, Arc};
+use std::{env, io, process, thread};
 
 use otp_cop::service::{CreateServiceResult, ServiceFactory};
-
 
 struct ParallelIter<T> {
     count: usize,
     pos: usize,
-    rx: mpsc::Receiver<T>
+    rx: mpsc::Receiver<T>,
 }
 
 impl<T> Iterator for ParallelIter<T> {
@@ -30,7 +29,11 @@ impl<T> Iterator for ParallelIter<T> {
 }
 
 fn parallel<T, U, F1>(objs: Vec<T>, f1: F1) -> ParallelIter<U>
-        where F1: 'static + Fn(T) -> U + Send + Sync, T: 'static + Send, U: 'static + Send {
+where
+    F1: 'static + Fn(T) -> U + Send + Sync,
+    T: 'static + Send,
+    U: 'static + Send,
+{
     let (tx, rx) = mpsc::channel();
     let count = objs.len();
     let shared_f1 = Arc::new(f1);
@@ -42,7 +45,11 @@ fn parallel<T, U, F1>(objs: Vec<T>, f1: F1) -> ParallelIter<U>
         });
     }
 
-    return ParallelIter{count: count, pos: 0, rx: rx};
+    return ParallelIter {
+        count: count,
+        pos: 0,
+        rx: rx,
+    };
 }
 
 fn main() {
@@ -110,7 +117,7 @@ fn main() {
                     println!("");
                     println!("");
                 }
-            },
+            }
             Err(e) => {
                 error_exit = true;
                 let mut t = term::stderr().unwrap();

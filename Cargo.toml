@@ -7,8 +7,7 @@ license = "BSD-3-Clause"
 
 [dependencies]
 getopts = "*"
-hyper = "*"
-hyper-native-tls = "*"
+reqwest = { version = "*", features = ["rustls-tls"], default-features = false }
 serde = "*"
 serde_derive = "*"
 serde_json = "*"

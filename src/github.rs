@@ -1,16 +1,11 @@
-use std::io::{Read};
+use std::io::Read;
 
 use getopts;
 use serde_json;
 
-use hyper::{Client};
-use hyper::header::{Authorization, Basic, UserAgent};
-use hyper::net::HttpsConnector;
-use hyper::status::{StatusCode};
+use reqwest::StatusCode;
 
-use hyper_native_tls::NativeTlsClient;
-
-use super::{CreateServiceResult, Service, ServiceFactory, GetUsersResult, GetUsersError, User};
+use super::{CreateServiceResult, GetUsersError, GetUsersResult, Service, ServiceFactory, User};
 
 const DEFAULT_ENDPOINT: &'static str = "https://api.github.com";
 
@@ -25,7 +20,6 @@ struct GithubUser {
     login: String,
 }
 
-
 pub struct GithubServiceFactory;
 
 impl ServiceFactory for GithubServiceFactory {
@@ -34,17 +28,11 @@ impl ServiceFactory for GithubServiceFactory {
             "",
             "github-endpoint",
             &format!("Github API endpoint URL (default: {})", DEFAULT_ENDPOINT),
-            "endpoint"
+            "endpoint",
         );
-        opts.optopt(
-            "", "github-org", "Gitub organization", "org",
-        );
-        opts.optopt(
-            "", "github-username", "Gitub username", "username",
-        );
-        opts.optopt(
-            "", "github-password", "Github password", "password",
-        );
+        opts.optopt("", "github-org", "Gitub organization", "org");
+        opts.optopt("", "github-username", "Gitub username", "username");
+        opts.optopt("", "github-password", "Github password", "password");
     }
 
     fn create_service(&self, matches: &getopts::Matches) -> CreateServiceResult {
@@ -54,14 +42,14 @@ impl ServiceFactory for GithubServiceFactory {
             matches.opt_str("github-username"),
             matches.opt_str("github-password"),
         ) {
-            (endpoint, Some(org), Some(username), Some(password)) => CreateServiceResult::Service(Box::new(
-                GithubService{
+            (endpoint, Some(org), Some(username), Some(password)) => {
+                CreateServiceResult::Service(Box::new(GithubService {
                     endpoint: endpoint.unwrap_or(DEFAULT_ENDPOINT.to_string()),
                     org: org,
                     username: username,
                     password: password,
-                }
-            )),
+                }))
+            }
             (None, None, None, None) => CreateServiceResult::None,
             (_, org, username, password) => {
                 let mut missing = vec![];
@@ -89,44 +77,47 @@ struct GithubService {
 
 impl Service for GithubService {
     fn get_users(&self) -> Result<GetUsersResult, GetUsersError> {
-        let client = Client::with_connector(HttpsConnector::new(NativeTlsClient::new().unwrap()));
+        let client = reqwest::Client::new();
 
-        let mut response = client.get(
-            &format!("{}/orgs/{}/members?filter=2fa_disabled", self.endpoint, self.org)
-        ).header(
-            Authorization(Basic{
-                username: self.username.to_string(),
-                password: Some(self.password.to_string()),
-            })
-        ).header(
-            UserAgent("otp-cop/0.1.0".to_string())
-        ).send().unwrap();
+        let mut response = client
+            .get(&format!(
+                "{}/orgs/{}/members?filter=2fa_disabled",
+                self.endpoint, self.org
+            ))
+            .basic_auth(self.username.to_string(), Some(self.password.to_string()))
+            .header(reqwest::header::USER_AGENT, "otp-cop/0.1.0")
+            .send()
+            .unwrap();
         let mut body = String::new();
         response.read_to_string(&mut body).unwrap();
 
-        match response.status {
-            StatusCode::Ok => {
+        match response.status() {
+            StatusCode::OK => {
                 let result = serde_json::from_str::<Vec<GithubUser>>(&body).unwrap();
 
-                return Ok(GetUsersResult{
+                return Ok(GetUsersResult {
                     service_name: "Github".to_string(),
-                    users: result.iter().map(|user| {
-                        User{
+                    users: result
+                        .iter()
+                        .map(|user| User {
                             name: user.login.to_string(),
                             email: None,
                             details: None,
-                        }
-                    }).collect(),
+                        })
+                        .collect(),
                 });
-            },
-            StatusCode::UnprocessableEntity => {
+            }
+            StatusCode::UNPROCESSABLE_ENTITY => {
                 let result = serde_json::from_str::<GithubError>(&body).unwrap();
 
-                return Err(GetUsersError{
+                return Err(GetUsersError {
                     service_name: "Github".to_string(),
-                    error_message: format!("{}\n  See {}", result.message, result.documentation_url),
+                    error_message: format!(
+                        "{}\n  See {}",
+                        result.message, result.documentation_url
+                    ),
                 });
-            },
+            }
             _ => panic!("Github: unexpected status code"),
         }
     }
