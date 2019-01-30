@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Alex Gaynor <alex.gaynor@gmail.com>"]
 repository = "https://github.com/alex/otp-cop"
 license = "BSD-3-Clause"
+edition = "2018"
 
 [dependencies]
 getopts = "*"

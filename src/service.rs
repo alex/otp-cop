@@ -23,8 +23,8 @@ pub enum CreateServiceResult {
 }
 
 pub trait ServiceFactory {
-    fn add_options(&self, &mut getopts::Options);
-    fn create_service(&self, &getopts::Matches) -> CreateServiceResult;
+    fn add_options(&self, _: &mut getopts::Options);
+    fn create_service(&self, _: &getopts::Matches) -> CreateServiceResult;
 }
 
 pub trait Service: Send + Sync {

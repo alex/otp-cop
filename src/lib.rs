@@ -6,11 +6,11 @@ extern crate reqwest;
 extern crate serde;
 extern crate serde_json;
 
-pub use github::GithubServiceFactory;
-pub use service::{
+pub use crate::github::GithubServiceFactory;
+pub use crate::service::{
     CreateServiceResult, GetUsersError, GetUsersResult, Service, ServiceFactory, User,
 };
-pub use slack::SlackServiceFactory;
+pub use crate::slack::SlackServiceFactory;
 
 pub mod github;
 pub mod service;
