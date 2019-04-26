@@ -5,7 +5,7 @@ extern crate otp_cop;
 
 use std::io::Write;
 use std::sync::{mpsc, Arc};
-use std::{env, io, process, thread};
+use std::{env, process, thread};
 
 use otp_cop::service::{CreateServiceResult, ServiceFactory};
 
@@ -21,9 +21,9 @@ impl<T> Iterator for ParallelIter<T> {
     fn next(&mut self) -> Option<T> {
         if self.pos < self.count {
             self.count += 1;
-            return self.rx.recv().ok();
+            self.rx.recv().ok()
         } else {
-            return None;
+            None
         }
     }
 }
@@ -45,11 +45,7 @@ where
         });
     }
 
-    return ParallelIter {
-        count: count,
-        pos: 0,
-        rx: rx,
-    };
+    ParallelIter { count, pos: 0, rx }
 }
 
 fn main() {
@@ -67,7 +63,7 @@ fn main() {
     let matches = match opts.parse(env::args().skip(1)) {
         Ok(matches) => matches,
         Err(e) => {
-            writeln!(io::stderr(), "{}", e.to_string()).unwrap();
+            eprintln!("{}", e.to_string());
             process::exit(1);
         }
     };
@@ -78,7 +74,7 @@ fn main() {
         match factory.create_service(&matches) {
             CreateServiceResult::Service(s) => services.push(s),
             CreateServiceResult::MissingArguments(args) => {
-                writeln!(io::stderr(), "Missing arguments: {:?}", args).unwrap();
+                eprintln!("Missing arguments: {:?}", args);
                 process::exit(1);
             }
             CreateServiceResult::None => continue,
@@ -86,7 +82,7 @@ fn main() {
     }
 
     if services.is_empty() {
-        writeln!(io::stderr(), "{}", opts.usage("otp-cop: <args>")).unwrap();
+        eprintln!("{}", opts.usage("otp-cop: <args>"));
         process::exit(1);
     }
 
@@ -98,7 +94,7 @@ fn main() {
                 let header = format!("{} ({})", result.service_name, result.users.len());
                 println!("{}", header);
                 println!("{}", repeat_char("=", header.len()));
-                println!("");
+                println!();
                 if !result.users.is_empty() {
                     error_exit = true;
                 }
@@ -114,8 +110,8 @@ fn main() {
                     println!("@{}{}{}", user.name, email, details);
                 }
                 if i + 1 != count {
-                    println!("");
-                    println!("");
+                    println!();
+                    println!();
                 }
             }
             Err(e) => {
@@ -123,7 +119,7 @@ fn main() {
                 let mut t = term::stderr().unwrap();
                 writeln!(t, "{}", e.service_name).unwrap();
                 writeln!(t, "{}", repeat_char("=", e.service_name.len())).unwrap();
-                writeln!(t, "").unwrap();
+                writeln!(t).unwrap();
                 t.fg(term::color::RED).unwrap();
                 writeln!(t, "{}", e.error_message).unwrap();
                 t.reset().unwrap();
@@ -137,5 +133,5 @@ fn main() {
 }
 
 fn repeat_char(c: &'static str, length: usize) -> String {
-    return c.chars().cycle().take(length).collect::<String>();
+    c.chars().cycle().take(length).collect::<String>()
 }

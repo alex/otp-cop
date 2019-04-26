@@ -7,7 +7,7 @@ use reqwest::StatusCode;
 
 use super::{CreateServiceResult, GetUsersError, GetUsersResult, Service, ServiceFactory, User};
 
-const DEFAULT_ENDPOINT: &'static str = "https://api.github.com";
+const DEFAULT_ENDPOINT: &str = "https://api.github.com";
 
 #[derive(Deserialize)]
 struct GithubError {
@@ -44,10 +44,10 @@ impl ServiceFactory for GithubServiceFactory {
         ) {
             (endpoint, Some(org), Some(username), Some(password)) => {
                 CreateServiceResult::Service(Box::new(GithubService {
-                    endpoint: endpoint.unwrap_or(DEFAULT_ENDPOINT.to_string()),
-                    org: org,
-                    username: username,
-                    password: password,
+                    endpoint: endpoint.unwrap_or_else(|| DEFAULT_ENDPOINT.to_string()),
+                    org,
+                    username,
+                    password,
                 }))
             }
             (None, None, None, None) => CreateServiceResult::None,
@@ -95,7 +95,7 @@ impl Service for GithubService {
             StatusCode::OK => {
                 let result = serde_json::from_str::<Vec<GithubUser>>(&body).unwrap();
 
-                return Ok(GetUsersResult {
+                Ok(GetUsersResult {
                     service_name: "Github".to_string(),
                     users: result
                         .iter()
@@ -105,18 +105,18 @@ impl Service for GithubService {
                             details: None,
                         })
                         .collect(),
-                });
+                })
             }
             StatusCode::UNPROCESSABLE_ENTITY => {
                 let result = serde_json::from_str::<GithubError>(&body).unwrap();
 
-                return Err(GetUsersError {
+                Err(GetUsersError {
                     service_name: "Github".to_string(),
                     error_message: format!(
                         "{}\n  See {}",
                         result.message, result.documentation_url
                     ),
-                });
+                })
             }
             _ => panic!("Github: unexpected status code"),
         }

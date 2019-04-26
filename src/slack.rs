@@ -43,7 +43,7 @@ impl ServiceFactory for SlackServiceFactory {
 
     fn create_service(&self, matches: &getopts::Matches) -> CreateServiceResult {
         match matches.opt_str("slack-token") {
-            Some(token) => CreateServiceResult::Service(Box::new(SlackService { token: token })),
+            Some(token) => CreateServiceResult::Service(Box::new(SlackService { token })),
             None => CreateServiceResult::None,
         }
     }
@@ -86,9 +86,9 @@ impl Service for SlackService {
             })
             .collect();
 
-        return Ok(GetUsersResult {
+        Ok(GetUsersResult {
             service_name: "Slack".to_string(),
-            users: users,
-        });
+            users,
+        })
     }
 }
