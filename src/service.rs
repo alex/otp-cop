@@ -19,7 +19,7 @@ pub struct User {
 pub enum CreateServiceResult {
     None,
     MissingArguments(Vec<String>),
-    Service(Box<Service>),
+    Service(Box<dyn Service>),
 }
 
 pub trait ServiceFactory {
