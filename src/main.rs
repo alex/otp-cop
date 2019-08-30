@@ -1,7 +1,7 @@
-extern crate getopts;
-extern crate term;
+use getopts;
+use term;
 
-extern crate otp_cop;
+use otp_cop;
 
 use std::io::Write;
 use std::sync::{mpsc, Arc};

@@ -1,4 +1,4 @@
-extern crate getopts;
+use getopts;
 
 pub struct GetUsersResult {
     pub service_name: String,
