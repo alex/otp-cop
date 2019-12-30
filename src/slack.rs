@@ -55,7 +55,7 @@ struct SlackService {
 
 impl Service for SlackService {
     fn get_users(&self) -> Result<GetUsersResult, GetUsersError> {
-        let client = reqwest::Client::new();
+        let client = reqwest::blocking::Client::new();
 
         let mut response = client
             .get(&format!(
