@@ -1,8 +1,3 @@
-use getopts;
-use term;
-
-use otp_cop;
-
 use std::io::Write;
 use std::sync::{mpsc, Arc};
 use std::{env, process, thread};

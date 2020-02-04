@@ -1,8 +1,5 @@
 use std::io::Read;
 
-use getopts;
-use serde_json;
-
 use reqwest::StatusCode;
 
 use super::{CreateServiceResult, GetUsersError, GetUsersResult, Service, ServiceFactory, User};
