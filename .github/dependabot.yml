@@ -7,4 +7,4 @@ updates:
     allow:
       # Also update indirect dependencies
       - dependency-type: all
-    open-pull-requests-limit: 0
+    open-pull-requests-limit: 1024
