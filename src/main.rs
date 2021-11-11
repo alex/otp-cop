@@ -58,7 +58,7 @@ fn main() {
     let matches = match opts.parse(env::args().skip(1)) {
         Ok(matches) => matches,
         Err(e) => {
-            eprintln!("{}", e.to_string());
+            eprintln!("{}", e);
             process::exit(1);
         }
     };
