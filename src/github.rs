@@ -24,7 +24,7 @@ impl ServiceFactory for GithubServiceFactory {
         opts.optopt(
             "",
             "github-endpoint",
-            &format!("Github API endpoint URL (default: {})", DEFAULT_ENDPOINT),
+            &format!("Github API endpoint URL (default: {DEFAULT_ENDPOINT})"),
             "endpoint",
         );
         opts.optopt("", "github-org", "Gitub organization", "org");
@@ -77,7 +77,7 @@ impl Service for GithubService {
         let client = reqwest::blocking::Client::new();
 
         let mut response = client
-            .get(&format!(
+            .get(format!(
                 "{}/orgs/{}/members?filter=2fa_disabled",
                 self.endpoint, self.org
             ))

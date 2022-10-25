@@ -58,7 +58,7 @@ fn main() {
     let matches = match opts.parse(env::args().skip(1)) {
         Ok(matches) => matches,
         Err(e) => {
-            eprintln!("{}", e);
+            eprintln!("{e}");
             process::exit(1);
         }
     };
@@ -69,7 +69,7 @@ fn main() {
         match factory.create_service(&matches) {
             CreateServiceResult::Service(s) => services.push(s),
             CreateServiceResult::MissingArguments(args) => {
-                eprintln!("Missing arguments: {:?}", args);
+                eprintln!("Missing arguments: {args:?}");
                 process::exit(1);
             }
             CreateServiceResult::None => continue,
@@ -87,7 +87,7 @@ fn main() {
         match result {
             Ok(result) => {
                 let header = format!("{} ({})", result.service_name, result.users.len());
-                println!("{}", header);
+                println!("{header}");
                 println!("{}", repeat_char("=", header.len()));
                 println!();
                 if !result.users.is_empty() {
@@ -95,14 +95,14 @@ fn main() {
                 }
                 for user in result.users {
                     let email = match user.email {
-                        Some(email) => format!(" ({})", email),
+                        Some(email) => format!(" ({email})"),
                         None => "".to_string(),
                     };
                     let details = match user.details {
-                        Some(details) => format!(" -- {}", details),
+                        Some(details) => format!(" -- {details}"),
                         None => "".to_string(),
                     };
-                    println!("@{}{}{}", user.name, email, details);
+                    println!("@{}{email}{details}", user.name);
                 }
                 if i + 1 != count {
                     println!();

@@ -55,7 +55,7 @@ impl Service for SlackService {
         let client = reqwest::blocking::Client::new();
 
         let mut response = client
-            .get(&format!(
+            .get(format!(
                 "https://slack.com/api/users.list?token={}",
                 self.token
             ))
