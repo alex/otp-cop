@@ -1037,9 +1037,9 @@ checksum = "30652a53018a48a9735fbc2986ff0446c37bc8bed0d3f98a0ed4d04cdb80027e"
 
 [[package]]
 name = "windows_x86_64_gnullvm"
-version = "0.48.4"
+version = "0.48.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5bb3f0331abfe1a95af56067f1e64b3791b55b5373b03869560b6025de809bf"
+checksum = "0b7b52767868a23d5bab768e390dc5f5c55825b6d30b86c844ff2dc7414044cc"
 
 [[package]]
 name = "windows_x86_64_msvc"
