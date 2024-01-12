@@ -44,7 +44,7 @@ where
 }
 
 fn main() {
-    let service_factories = vec![
+    let service_factories = [
         Box::new(otp_cop::SlackServiceFactory) as Box<dyn ServiceFactory>,
         Box::new(otp_cop::GithubServiceFactory) as Box<dyn ServiceFactory>,
     ];
