@@ -1,6 +1,8 @@
 otp-cop
 =======
 
+  At this point, these services all natively have the ability to mandate 2FA, therefore this project is retired.
+
 Verify that everyone in your organization has 2fa set up. Works with the
 following services:
 
